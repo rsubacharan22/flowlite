@@ -66,7 +66,7 @@ function Topbar({
     try {
 
       const res = await axios.get(
-        'http://localhost:5000/api/notifications',
+        'process.env.REACT_APP_API_URL/api/notifications',
         {
           headers: {
             Authorization: `Bearer ${token}`
