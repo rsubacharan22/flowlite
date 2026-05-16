@@ -19,7 +19,7 @@ import Badge from './Badge';
 import SidebarItem from './SidebarItem';
 import Topbar from './Topbar';
 
-import { clearSession } from '../utils/auth';
+import { clearSession } from '../utils/api/auth';
 import { pageTransition } from '../utils/motion';
 import { useAuth } from '../hooks/useAuth';
 
@@ -142,7 +142,7 @@ function Layout({
       {
         label: 'Users',
         icon: Users,
-        path: '/admin/users'
+        path: '/admin/api/users'
       },
 
       {

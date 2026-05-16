@@ -18,10 +18,10 @@ import EmptyState from '../components/EmptyState';
 import Layout from '../components/Layout';
 import MetricCard from '../components/MetricCard';
 import RequestCard from '../components/RequestCard';
-import { ROLES } from '../utils/auth';
+import { ROLES } from '../utils/api/auth';
 import { useAuth } from '../hooks/useAuth';
 import { staggerContainer } from '../utils/motion';
-import { buildRequestMetrics, isOverdue } from '../utils/requests';
+import { buildRequestMetrics, isOverdue } from '../utils/api/requests';
 
 const EMPLOYEE_FILTERS = [
   { label: 'All', value: 'all' },
@@ -358,15 +358,15 @@ function Dashboard() {
 
       if (isAdmin) {
         // Admin sees org-wide overview only
-        const allRes = await api.get('/requests/all');
+        const allRes = await api.get('/api/requests/all');
         setOverviewRequests(allRes.data);
         setRequests([]);
       } else if (isEmployee) {
-        const res = await api.get('/requests/my');
+        const res = await api.get('/api/requests/my');
         setRequests(res.data);
       } else {
         // Approver sees their own task queue
-        const res = await api.get('/requests/assigned');
+        const res = await api.get('/api/requests/assigned');
         setRequests(res.data);
       }
     } catch {
@@ -386,7 +386,7 @@ function Dashboard() {
   const reviewRequest = async (id, action) => {
     try {
       setActioningId(id);
-      await api.put(`/requests/${action}/${id}`, { remark: remarks[id] || '' });
+      await api.put(`/api/requests/${action}/${id}`, { remark: remarks[id] || '' });
       setRemarks((cur) => {
         const next = { ...cur };
         delete next[id];

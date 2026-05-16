@@ -27,7 +27,7 @@ function App() {
         <Route path="/analytics" element={<AdminAnalytics />} />
 
         {/* Admin */}
-        <Route path="/admin/users" element={<AdminUsers />} />
+        <Route path="/admin/api/users" element={<AdminUsers />} />
 
         {/* Fallback */}
         <Route path="*" element={<Navigate replace to="/" />} />

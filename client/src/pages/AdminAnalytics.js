@@ -29,14 +29,14 @@ import Card from '../components/Card';
 import EmptyState from '../components/EmptyState';
 import Layout from '../components/Layout';
 import MetricCard from '../components/MetricCard';
-import { canAccessAnalytics, ROLES } from '../utils/auth';
+import { canAccessAnalytics, ROLES } from '../utils/api/auth';
 import { useAuth } from '../hooks/useAuth';
 import {
   buildRequestMetrics,
   buildWorkerStats,
   formatDate,
   getPriority
-} from '../utils/requests';
+} from '../utils/api/requests';
 
 const CHART_COLORS = {
   approved: '#10b981',
@@ -146,7 +146,7 @@ function AdminAnalytics() {
 
       try {
         setLoading(true);
-        const res = await api.get('/requests/all');
+        const res = await api.get('/api/requests/all');
         setRequests(res.data);
       } catch {
         // silently fail

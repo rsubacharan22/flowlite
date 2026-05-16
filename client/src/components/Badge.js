@@ -1,4 +1,4 @@
-import { priorityMeta, statusMeta, getPriority } from '../utils/requests';
+import { priorityMeta, statusMeta, getPriority } from '../utils/api/requests';
 
 const roleMeta = {
   employee: { label: 'Employee', className: 'border-slate-200 bg-slate-100 text-slate-600' },

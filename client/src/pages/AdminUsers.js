@@ -62,7 +62,7 @@ function CreateUserModal({ onClose, onCreated }) {
 
     try {
       setSubmitting(true);
-      const res = await api.post('/admin/users', { name, email, password, role });
+      const res = await api.post('/admin/api/users', { name, email, password, role });
       onCreated(res.data);
       onClose();
     } catch (err) {
@@ -197,7 +197,7 @@ function AdminUsers() {
   const fetchUsers = useCallback(async () => {
     try {
       setLoading(true);
-      const res = await api.get('/admin/users');
+      const res = await api.get('/admin/api/users');
       setUsers(res.data);
     } catch {
       // silently handle
@@ -221,7 +221,7 @@ function AdminUsers() {
   const handleRoleChange = async (userId, newRole) => {
     try {
       setActioningId(userId);
-      const res = await api.patch(`/admin/users/${userId}/role`, { role: newRole });
+      const res = await api.patch(`/admin/api/users/${userId}/role`, { role: newRole });
       setUsers((prev) => prev.map((u) => (u._id === userId ? res.data : u)));
       showToast('Role updated successfully.');
     } catch (err) {
@@ -234,7 +234,7 @@ function AdminUsers() {
   const handleToggleStatus = async (userId, currentlyActive) => {
     try {
       setActioningId(userId);
-      const res = await api.patch(`/admin/users/${userId}/status`, { isActive: !currentlyActive });
+      const res = await api.patch(`/admin/api/users/${userId}/status`, { isActive: !currentlyActive });
       setUsers((prev) => prev.map((u) => (u._id === userId ? res.data : u)));
       showToast(`Account ${!currentlyActive ? 'activated' : 'deactivated'} successfully.`);
     } catch (err) {
@@ -248,7 +248,7 @@ function AdminUsers() {
     if (!window.confirm(`Delete ${userName}? This cannot be undone.`)) return;
     try {
       setActioningId(userId);
-      await api.delete(`/admin/users/${userId}`);
+      await api.delete(`/admin/api/users/${userId}`);
       setUsers((prev) => prev.filter((u) => u._id !== userId));
       showToast('User deleted successfully.');
     } catch (err) {

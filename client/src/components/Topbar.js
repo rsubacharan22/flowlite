@@ -16,8 +16,7 @@ import axios from 'axios';
 
 import { useNavigate } from 'react-router-dom';
 
-import { clearSession } from '../utils/auth';
-import { useAuth } from '../hooks/useAuth';
+import { clearSession } from '../utils/api/auth';
 
 
 function Topbar({
@@ -31,7 +30,6 @@ function Topbar({
 
   const navigate = useNavigate();
 
-  const { role } = useAuth();
 
   const token =
     localStorage.getItem('token');
@@ -66,8 +64,7 @@ function Topbar({
     try {
 
       const res = await axios.get(
-        'process.env.REACT_APP_API_URL/api/notifications',
-        {
+`${process.env.REACT_APP_API_URL}/api/api/notifications`,      {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -91,11 +88,11 @@ function Topbar({
   // LOAD
   // =====================================================
 
-  useEffect(() => {
+ useEffect(() => {
 
-    fetchNotifications();
+  fetchNotifications();
 
-  }, []);
+}, [fetchNotifications]);
 
 
   // =====================================================

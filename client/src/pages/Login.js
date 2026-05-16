@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import logo from '../assets/logo.png';
 import api from '../api/http';
-import { getStoredUser, setSession } from '../utils/auth';
+import { getStoredUser, setSession } from '../utils/api/auth';
 
 
 function Login() {
@@ -32,7 +32,7 @@ function Login() {
 
     try {
       setLoading(true);
-      const response = await api.post('/auth/login', { email, password });
+      const response = await api.post('/api/api/api/auth/login', { email, password });
       setSession({ token: response.data.token, user: response.data.user });
       navigate('/dashboard', { replace: true });
     } catch (err) {

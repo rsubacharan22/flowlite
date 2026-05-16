@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/http';
 import Button from '../components/Button';
 import Layout from '../components/Layout';
-import { ROLES } from '../utils/auth';
+import { ROLES } from '../utils/api/auth';
 import { useAuth } from '../hooks/useAuth';
 import { REQUEST_TYPES } from '../utils/formatters';
 
@@ -74,7 +74,7 @@ function EmployeeForm() {
 
     try {
       setSubmitting(true);
-      await api.post('/requests/create', {
+      await api.post('/api/requests/create', {
         title: requestType,
         description: reason,
         priority: 'medium',
@@ -173,7 +173,7 @@ function OperationalForm({ users }) {
 
     try {
       setSubmitting(true);
-      await api.post('/requests/create', {
+      await api.post('/api/requests/create', {
         title: title.trim(),
         description,
         assignedTo,
@@ -328,7 +328,7 @@ function CreateRequest() {
         setLoadingUsers(true);
         // Employee doesn't need user list; only approver does
         if (!isEmployee) {
-          const res = await api.get('/users');
+          const res = await api.get('/api/users');
           setUsers(res.data);
         }
       } catch {
