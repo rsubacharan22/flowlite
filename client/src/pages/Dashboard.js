@@ -21,7 +21,7 @@ import RequestCard from '../components/RequestCard';
 import { ROLES } from '../utils/auth';
 import { useAuth } from '../hooks/useAuth';
 import { staggerContainer } from '../utils/motion';
-import { buildRequestMetrics, isOverdue } from '../utils/api/requests';
+import { buildRequestMetrics, isOverdue } from '../utils/requests';
 
 const EMPLOYEE_FILTERS = [
   { label: 'All', value: 'all' },

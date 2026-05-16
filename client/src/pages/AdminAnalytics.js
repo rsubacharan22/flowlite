@@ -36,7 +36,7 @@ import {
   buildWorkerStats,
   formatDate,
   getPriority
-} from '../utils/api/requests';
+} from '../utils/requests';
 
 const CHART_COLORS = {
   approved: '#10b981',
