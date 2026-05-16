@@ -32,7 +32,7 @@ function Login() {
 
     try {
       setLoading(true);
-      const response = await api.post('/api/api/api/auth/login', { email, password });
+      const response = await api.post('/api/auth/login', { email, password });
       setSession({ token: response.data.token, user: response.data.user });
       navigate('/dashboard', { replace: true });
     } catch (err) {
