@@ -16,7 +16,7 @@ import axios from 'axios';
 
 import { useNavigate } from 'react-router-dom';
 
-import { clearSession } from '../utils/api/auth';
+import { clearSession } from '../utils/auth';
 
 
 function Topbar({

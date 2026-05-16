@@ -1,0 +1,34 @@
+c:/api/users/rsuba/Downloads/Flowlite/server/
+├─] .env (ignored)
+├── .gitignore
+├── client/
+│   └── src/
+│       ├── App.js
+│       ├── components/
+│       │   ├── Button.js
+│       │   ├── Card.js
+│       │   ├── Layout.js
+│       │   ├── NotificationItem.js
+│       │   └── NotificationsList.js
+│       ├── index.css
+│       └── pages/
+│           ├── CreateRequest.js
+│           ├── Dashboard.js
+│           └── Login.js
+├── middleware/
+│   └── authMiddleware.js
+├── models/
+│   ├── Notification.js
+│   ├── Request.js
+│   └── user.js
+├─] node_modules/ (ignored)
+├── package-lock.json
+├── package.json
+├── routes/
+│   ├── authRoutes.js
+│   ├── notificationRoutes.js
+│   ├── requestRoutes.js
+│   └── userRoutes.js
+├── server.js
+└── utils/
+    └── roles.js

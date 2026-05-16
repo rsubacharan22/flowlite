@@ -14,7 +14,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/http';
 import Badge from '../components/Badge';
 import Layout from '../components/Layout';
-import { updateStoredUser } from '../utils/api/auth';
+import { updateStoredUser } from '../utils/auth';
 import { useAuth } from '../hooks/useAuth';
 
 function FieldGroup({ label, children, hint }) {

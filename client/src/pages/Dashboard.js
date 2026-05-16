@@ -18,7 +18,7 @@ import EmptyState from '../components/EmptyState';
 import Layout from '../components/Layout';
 import MetricCard from '../components/MetricCard';
 import RequestCard from '../components/RequestCard';
-import { ROLES } from '../utils/api/auth';
+import { ROLES } from '../utils/auth';
 import { useAuth } from '../hooks/useAuth';
 import { staggerContainer } from '../utils/motion';
 import { buildRequestMetrics, isOverdue } from '../utils/api/requests';

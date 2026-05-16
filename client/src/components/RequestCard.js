@@ -11,7 +11,7 @@ import { motion } from 'framer-motion';
 
 import Badge from './Badge';
 import Button from './Button';
-import { canReview } from '../utils/api/auth';
+import { canReview } from '../utils/auth';
 import { formatDate, getPriority, isOverdue } from '../utils/api/requests';
 import { isEmployeeRequest, timeAgo } from '../utils/formatters';
 import { fadeInUp } from '../utils/motion';

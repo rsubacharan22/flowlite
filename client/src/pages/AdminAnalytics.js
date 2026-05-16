@@ -29,7 +29,7 @@ import Card from '../components/Card';
 import EmptyState from '../components/EmptyState';
 import Layout from '../components/Layout';
 import MetricCard from '../components/MetricCard';
-import { canAccessAnalytics, ROLES } from '../utils/api/auth';
+import { canAccessAnalytics, ROLES } from '../utils/auth';
 import { useAuth } from '../hooks/useAuth';
 import {
   buildRequestMetrics,

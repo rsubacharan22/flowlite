@@ -6,7 +6,7 @@ import {
   canReview,
   getStoredUser,
   ROLES
-} from '../utils/api/auth';
+} from '../utils/auth';
 
 /**
  * Centralized auth hook. Returns the current user and all derived role flags.

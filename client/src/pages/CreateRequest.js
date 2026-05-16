@@ -6,7 +6,7 @@ import { useNavigate } from 'react-router-dom';
 import api from '../api/http';
 import Button from '../components/Button';
 import Layout from '../components/Layout';
-import { ROLES } from '../utils/api/auth';
+import { ROLES } from '../utils/auth';
 import { useAuth } from '../hooks/useAuth';
 import { REQUEST_TYPES } from '../utils/formatters';
 
