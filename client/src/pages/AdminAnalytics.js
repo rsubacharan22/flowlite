@@ -431,7 +431,7 @@ function AdminAnalytics() {
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-1.5">
-                      <Badge value={request.status} />
+                      <Badge value={request.status} isTask={!isEmployeeRequest(request)} />
                       <Badge type="priority" value={getPriority(request.priority)} />
                     </div>
                   </div>

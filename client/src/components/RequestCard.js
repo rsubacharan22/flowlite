@@ -137,6 +137,25 @@ function OperationalCard({
   );
   const overdue = isOverdue(request);
 
+  let completionStamp = null;
+  if (!isHRRequest && request.status === 'approved') {
+    const historyItem = request.history?.find(h => h.action === 'approved');
+    if (historyItem?.at && request.deadline) {
+      const diffMs = new Date(request.deadline) - new Date(historyItem.at);
+      const isEarly = diffMs >= 0;
+      const diffHours = Math.abs(diffMs) / (1000 * 60 * 60);
+      
+      let text;
+      if (diffHours < 1) text = `${Math.round(diffHours * 60)} minutes`;
+      else if (diffHours < 24) text = `${Math.round(diffHours)} hours`;
+      else text = `${Math.round(diffHours / 24)} days`;
+      
+      completionStamp = `Completed ${text} ${isEarly ? 'early' : 'late'}`;
+    } else if (historyItem?.at) {
+      completionStamp = 'Completed';
+    }
+  }
+
   return (
     <motion.div
       variants={fadeInUp}
@@ -153,12 +172,18 @@ function OperationalCard({
           <div className="min-w-0 flex-1">
             {/* Badges */}
             <div className="flex flex-wrap items-center gap-2">
-              <Badge value={request.status} />
+              <Badge value={request.status} isTask={!isHRRequest} />
               <Badge type="priority" value={getPriority(request.priority)} />
               {overdue && (
                 <span className="inline-flex items-center gap-1 rounded-full border border-rose-200 bg-rose-50 px-2.5 py-0.5 text-xs font-semibold text-rose-700">
                   <Clock3 className="h-3 w-3" />
                   Overdue
+                </span>
+              )}
+              {completionStamp && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-blue-200 bg-blue-50 px-2.5 py-0.5 text-xs font-semibold text-blue-700">
+                  <CheckCircle2 className="h-3 w-3" />
+                  {completionStamp}
                 </span>
               )}
             </div>

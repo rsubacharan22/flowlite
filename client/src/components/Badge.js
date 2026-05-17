@@ -6,13 +6,17 @@ const roleMeta = {
   admin: { label: 'Admin', className: 'border-violet-200 bg-violet-50 text-violet-700' }
 };
 
-function Badge({ className = '', small = false, type = 'status', value }) {
+function Badge({ className = '', small = false, type = 'status', value, isTask = false }) {
   const normalizedValue = type === 'priority' ? getPriority(value) : value;
   const source = type === 'priority' ? priorityMeta : statusMeta;
-  const meta =
-    type === 'role'
+  const meta = { ...(type === 'role'
       ? roleMeta[value] || roleMeta.employee
-      : source[normalizedValue] || source.pending;
+      : source[normalizedValue] || source.pending) };
+
+  if (isTask && type === 'status') {
+    if (value === 'approved') meta.label = 'Completed';
+    if (value === 'pending') meta.label = 'Not Completed';
+  }
 
   const sizeClass = small
     ? 'px-2 py-0.5 text-[10px]'

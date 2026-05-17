@@ -134,21 +134,9 @@ function Layout({
       },
 
       {
-        label: 'Analytics',
-        icon: BarChart3,
-        path: '/analytics'
-      },
-
-      {
         label: 'Users',
         icon: Users,
         path: '/admin/api/users'
-      },
-
-      {
-        label: 'Reports',
-        icon: ClipboardList,
-        path: '/reports'
       }
     ];
 
