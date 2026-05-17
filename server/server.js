@@ -18,7 +18,7 @@ app.use(express.json());
 app.use('/api', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/requests', requestRoutes);
-app.use("/api/notifications",notificationRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 
 app.get('/', (req, res) => {

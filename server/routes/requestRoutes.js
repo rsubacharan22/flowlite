@@ -96,7 +96,7 @@ router.post("/create", authMiddleware, async (req, res) => {
         title: "New Task Assigned",
         message: `A new task was assigned: ${title}`,
         type: "info",
-        link: `/requests/${request._id}` // <--- NEW DIRECT LINK
+        link: `/api/requests/${request._id}` // <--- NEW DIRECT LINK
       });
     }
 
@@ -107,7 +107,7 @@ router.post("/create", authMiddleware, async (req, res) => {
         title: "New Employee Request",
         message: "A new employee request was submitted.",
         type: "warning",
-        link: `/requests/${request._id}` // <--- NEW DIRECT LINK
+        link: `/api/requests/${request._id}` // <--- NEW DIRECT LINK
       });
     }
 
@@ -150,7 +150,7 @@ const reviewRequest = async (req, res, status) => {
       title: status === "approved" ? "Request Approved" : "Request Rejected",
       message: status === "approved" ? "Your request has been approved." : "Your request has been rejected.",
       type: status === "approved" ? "success" : "error",
-      link: `/requests/${request._id}` // <--- NEW DIRECT LINK
+      link: `/api/requests/${request._id}` // <--- NEW DIRECT LINK
     });
 
     const populatedRequest = await populateRequest(Request.findById(request._id));
@@ -165,7 +165,69 @@ const reviewRequest = async (req, res, status) => {
 router.put("/approve/:id", authMiddleware, (req, res) => { reviewRequest(req, res, "approved"); });
 router.put("/reject/:id", authMiddleware, (req, res) => { reviewRequest(req, res, "rejected"); });
 
-// ... (KEEP YOUR EXISTING /my, /assigned, /all, /:id, AND /test ROUTES EXACTLY AS THEY WERE) ...
-// I am omitting them here for brevity, but you should keep them in your file.
+// =====================================================
+// GET MY REQUESTS (Employee)
+// =====================================================
+router.get("/my", authMiddleware, async (req, res) => {
+  try {
+    const requests = await populateRequest(
+      Request.find({ createdBy: req.user.id }).sort({ createdAt: -1 })
+    );
+    res.json(requests);
+  } catch (err) {
+    console.error("Fetch My Requests Error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// =====================================================
+// GET ASSIGNED REQUESTS (Approver)
+// =====================================================
+router.get("/assigned", authMiddleware, async (req, res) => {
+  try {
+    const requests = await populateRequest(
+      Request.find({ assignedTo: req.user.id }).sort({ createdAt: -1 })
+    );
+    res.json(requests);
+  } catch (err) {
+    console.error("Fetch Assigned Requests Error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// =====================================================
+// GET ALL REQUESTS (Admin)
+// =====================================================
+router.get("/all", authMiddleware, async (req, res) => {
+  try {
+    if (req.user.role !== ROLES.ADMIN) {
+      return res.status(403).json({ message: "Admin access required" });
+    }
+    const requests = await populateRequest(
+      Request.find().sort({ createdAt: -1 })
+    );
+    res.json(requests);
+  } catch (err) {
+    console.error("Fetch All Requests Error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
+
+// =====================================================
+// GET SPECIFIC REQUEST
+// =====================================================
+router.get("/:id", authMiddleware, async (req, res) => {
+  try {
+    const request = await populateRequest(Request.findById(req.params.id));
+    if (!request) return res.status(404).json({ message: "Request not found" });
+    if (!canViewRequest(req.user, request)) {
+      return res.status(403).json({ message: "Not authorized to view this request" });
+    }
+    res.json(request);
+  } catch (err) {
+    console.error("Fetch Request Error:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+});
 
 module.exports = router;
