@@ -175,8 +175,16 @@ function Topbar({
         ));
       }
       setNotifOpen(false);
-      if (n.link) {
-        navigate(n.link);
+      
+      let finalLink = n.link;
+      // Intercept old broken backend links
+      if (finalLink && finalLink.startsWith('/api/requests/')) {
+        const id = finalLink.split('/').pop();
+        finalLink = `/dashboard?highlight=${id}`;
+      }
+
+      if (finalLink) {
+        navigate(finalLink);
       }
     } catch (err) {
       console.log('MARK READ ERROR:', err);

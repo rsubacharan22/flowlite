@@ -96,7 +96,7 @@ router.post("/create", authMiddleware, async (req, res) => {
         title: "New Task Assigned",
         message: `A new task was assigned: ${title}`,
         type: "info",
-        link: `/dashboard` // <--- FIXED NOTIFICATION LINK
+        link: `/dashboard?highlight=${request._id}` // <--- FLUID NOTIFICATION LINK
       });
     }
 
@@ -107,7 +107,7 @@ router.post("/create", authMiddleware, async (req, res) => {
         title: "New Employee Request",
         message: "A new employee request was submitted.",
         type: "warning",
-        link: `/dashboard` // <--- FIXED NOTIFICATION LINK
+        link: `/dashboard?highlight=${request._id}` // <--- FLUID NOTIFICATION LINK
       });
     }
 
@@ -150,7 +150,7 @@ const reviewRequest = async (req, res, status) => {
       title: status === "approved" ? "Request Approved" : "Request Rejected",
       message: status === "approved" ? "Your request has been approved." : "Your request has been rejected.",
       type: status === "approved" ? "success" : "error",
-      link: `/dashboard` // <--- FIXED NOTIFICATION LINK
+      link: `/dashboard?highlight=${request._id}` // <--- FLUID NOTIFICATION LINK
     });
 
     const populatedRequest = await populateRequest(Request.findById(request._id));

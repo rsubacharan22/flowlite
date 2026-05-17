@@ -11,7 +11,7 @@ import {
 } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 import api from '../api/http';
 import EmptyState from '../components/EmptyState';
@@ -22,6 +22,7 @@ import { ROLES } from '../utils/auth';
 import { useAuth } from '../hooks/useAuth';
 import { staggerContainer } from '../utils/motion';
 import { buildRequestMetrics, isOverdue } from '../utils/requests';
+import { isEmployeeRequest } from '../utils/formatters';
 
 const EMPLOYEE_FILTERS = [
   { label: 'All', value: 'all' },
@@ -32,6 +33,8 @@ const EMPLOYEE_FILTERS = [
 
 const APPROVER_FILTERS = [
   { label: 'All', value: 'all' },
+  { label: 'HR Requests', value: 'hr' },
+  { label: 'Assigned Tasks', value: 'tasks' },
   { label: 'Pending', value: 'pending' },
   { label: 'Approved', value: 'approved' },
   { label: 'Rejected', value: 'rejected' },
@@ -169,6 +172,8 @@ function ApproverDashboard({
       const matchSearch = !q || text.includes(q);
       const matchFilter =
         filter === 'all' ||
+        (filter === 'hr' && isEmployeeRequest(r)) ||
+        (filter === 'tasks' && !isEmployeeRequest(r)) ||
         r.status === filter ||
         (filter === 'overdue' && isOverdue(r)) ||
         (filter === 'high' && r.priority === 'high');
@@ -341,6 +346,7 @@ function AdminDashboard({ requests, overviewRequests, loading }) {
 // ── Page ───────────────────────────────────────────────────────────────────────
 function Dashboard() {
   const navigate = useNavigate();
+  const location = useLocation();
   const { user, isEmployee, isAdmin, isApprover } = useAuth();
 
   const [requests, setRequests] = useState([]);
@@ -385,8 +391,24 @@ function Dashboard() {
     fetchRequests();
   }, [fetchRequests]);
 
-  const updateRemark = (id, value) =>
-    setRemarks((cur) => ({ ...cur, [id]: value }));
+  // Highlight request from notification
+  useEffect(() => {
+    const searchParams = new URLSearchParams(location.search);
+    const highlightId = searchParams.get('highlight');
+    if (highlightId && !loading && requests.length > 0) {
+      setTimeout(() => {
+        const el = document.getElementById(`req-${highlightId}`);
+        if (el) {
+          el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          el.classList.add('ring-2', 'ring-blue-500', 'ring-offset-2');
+          setTimeout(() => el.classList.remove('ring-2', 'ring-blue-500', 'ring-offset-2'), 3000);
+        }
+      }, 100);
+    }
+  }, [location.search, loading, requests]);
+
+  const updateRemark = useCallback((id, value) =>
+    setRemarks((cur) => ({ ...cur, [id]: value })), []);
 
   const reviewRequest = async (id, action) => {
     try {

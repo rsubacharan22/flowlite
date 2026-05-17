@@ -127,8 +127,14 @@ function OperationalCard({
   request,
   user
 }) {
-  const mayReview = (canReview(user) || user?.role === 'employee') && request.status === 'pending';
+  const isHRRequest = isEmployeeRequest(request);
+  const isAssignedToMe = request.assignedTo?._id === user?.id;
   const isEmployee = user?.role === 'employee';
+  
+  const mayReview = request.status === 'pending' && (
+    (isEmployee && !isHRRequest && isAssignedToMe) || 
+    (!isEmployee && isHRRequest && isAssignedToMe)
+  );
   const overdue = isOverdue(request);
 
   return (
@@ -138,7 +144,8 @@ function OperationalCard({
       animate="show"
       whileHover={{ y: -2 }}
       transition={{ duration: 0.2 }}
-      className="rounded-2xl border border-slate-200 bg-white shadow-card transition-shadow hover:shadow-card-hover"
+      id={`req-${request._id}`}
+      className="rounded-2xl border border-slate-200 bg-white shadow-card transition-all hover:shadow-card-hover"
     >
       <div className="p-5 sm:p-6">
         <div className="flex flex-col gap-5 xl:flex-row xl:items-start xl:justify-between">
@@ -205,14 +212,16 @@ function OperationalCard({
                 >
                   {isEmployee ? 'Complete Task' : 'Approve'}
                 </Button>
-                <Button
-                  danger
-                  disabled={busy}
-                  icon={XCircle}
-                  onClick={() => onReject(request._id)}
-                >
-                  {isEmployee ? 'Cannot Complete' : 'Reject'}
-                </Button>
+                {!isEmployee && (
+                  <Button
+                    danger
+                    disabled={busy}
+                    icon={XCircle}
+                    onClick={() => onReject(request._id)}
+                  >
+                    Reject
+                  </Button>
+                )}
               </div>
             </div>
           )}

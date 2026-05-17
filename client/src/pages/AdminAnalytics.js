@@ -37,6 +37,7 @@ import {
   formatDate,
   getPriority
 } from '../utils/requests';
+import { isEmployeeRequest } from '../utils/formatters';
 
 const CHART_COLORS = {
   approved: '#10b981',
@@ -132,6 +133,7 @@ function AdminAnalytics() {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [viewMode, setViewMode] = useState('all'); // all, hr, tasks
 
   useEffect(() => {
     const fetchRequests = async () => {
@@ -158,8 +160,14 @@ function AdminAnalytics() {
     fetchRequests();
   }, [navigate, user]);
 
-  const metrics = useMemo(() => buildRequestMetrics(requests), [requests]);
-  const workerStats = useMemo(() => buildWorkerStats(requests), [requests]);
+  const visibleRequestsForMetrics = useMemo(() => {
+    if (viewMode === 'hr') return requests.filter(r => isEmployeeRequest(r));
+    if (viewMode === 'tasks') return requests.filter(r => !isEmployeeRequest(r));
+    return requests;
+  }, [requests, viewMode]);
+
+  const metrics = useMemo(() => buildRequestMetrics(visibleRequestsForMetrics), [visibleRequestsForMetrics]);
+  const workerStats = useMemo(() => buildWorkerStats(visibleRequestsForMetrics), [visibleRequestsForMetrics]);
 
   const statusData = useMemo(() => ([
     { name: 'Approved', value: metrics.approved, key: 'approved' },
@@ -170,9 +178,9 @@ function AdminAnalytics() {
   const priorityData = useMemo(() => (
     ['low', 'medium', 'high'].map((p) => ({
       name: p,
-      value: requests.filter((r) => getPriority(r.priority) === p).length
+      value: visibleRequestsForMetrics.filter((r) => getPriority(r.priority) === p).length
     }))
-  ), [requests]);
+  ), [visibleRequestsForMetrics]);
 
   const normalizedSearch = search.trim().toLowerCase();
 
@@ -183,13 +191,13 @@ function AdminAnalytics() {
 
   const recentRequests = useMemo(() => {
     const matching = normalizedSearch
-      ? requests.filter((r) =>
+      ? visibleRequestsForMetrics.filter((r) =>
           [r.title, r.createdBy?.name, r.assignedTo?.name, r.status, r.priority]
             .filter(Boolean).join(' ').toLowerCase().includes(normalizedSearch)
         )
-      : requests;
+      : visibleRequestsForMetrics;
     return matching.slice(0, 8);
-  }, [normalizedSearch, requests]);
+  }, [normalizedSearch, visibleRequestsForMetrics]);
 
   const pageTitle = user?.role === ROLES.ADMIN ? 'Analytics' : 'Team Analytics';
   const pageSubtitle = user?.role === ROLES.ADMIN
@@ -211,6 +219,27 @@ function AdminAnalytics() {
           </div>
         ) : requests.length ? (
           <>
+            <div className="mb-5 flex gap-2">
+              <button
+                onClick={() => setViewMode('all')}
+                className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${viewMode === 'all' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+              >
+                All Data
+              </button>
+              <button
+                onClick={() => setViewMode('hr')}
+                className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${viewMode === 'hr' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+              >
+                HR Requests
+              </button>
+              <button
+                onClick={() => setViewMode('tasks')}
+                className={`rounded-lg px-4 py-2 text-sm font-semibold transition ${viewMode === 'tasks' ? 'bg-slate-900 text-white' : 'bg-slate-100 text-slate-500 hover:bg-slate-200'}`}
+              >
+                Assigned Tasks
+              </button>
+            </div>
+
             {/* ── KPI row ── */}
             <div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-6">
               <MetricCard icon={Activity} title="Total" tone="blue" value={metrics.total} />
