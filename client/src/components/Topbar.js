@@ -64,7 +64,7 @@ function Topbar({
     try {
 
       const res = await axios.get(
-`${process.env.REACT_APP_API_URL}/api/api/notifications`,      {
+`${process.env.REACT_APP_API_URL}/api/notifications`,      {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -144,6 +144,43 @@ function Topbar({
     setNotifOpen(false);
 
     setAvatarOpen(false);
+  };
+
+  // =====================================================
+  // MARK AS READ
+  // =====================================================
+  const handleMarkAllAsRead = async () => {
+    try {
+      await axios.put(
+        `${process.env.REACT_APP_API_URL}/api/notifications/read-all`,
+        {},
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      setNotifications(notifications.map(n => ({ ...n, read: true })));
+    } catch (err) {
+      console.log('MARK ALL READ ERROR:', err);
+    }
+  };
+
+  const handleNotificationClick = async (n) => {
+    try {
+      if (!n.read) {
+        await axios.put(
+          `${process.env.REACT_APP_API_URL}/api/notifications/read/${n._id}`,
+          {},
+          { headers: { Authorization: `Bearer ${token}` } }
+        );
+        setNotifications(notifications.map(notif => 
+          notif._id === n._id ? { ...notif, read: true } : notif
+        ));
+      }
+      setNotifOpen(false);
+      if (n.link) {
+        navigate(n.link);
+      }
+    } catch (err) {
+      console.log('MARK READ ERROR:', err);
+    }
   };
 
 
@@ -478,11 +515,15 @@ function Topbar({
 
                           key={n._id}
 
+                          onClick={() => handleNotificationClick(n)}
+
                           className={[
                             `
                               flex items-start
                               gap-3
                               px-4 py-3
+                              cursor-pointer
+                              transition hover:bg-slate-50
                             `,
                             !n.read
                               ? 'bg-blue-50/40'
@@ -564,9 +605,7 @@ function Topbar({
                           text-blue-600
                           hover:text-blue-700
                         "
-                        onClick={() =>
-                          setNotifOpen(false)
-                        }
+                        onClick={handleMarkAllAsRead}
                       >
                         Mark all as read
                       </button>

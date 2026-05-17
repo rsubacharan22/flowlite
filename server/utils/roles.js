@@ -21,10 +21,7 @@ const canReviewRequest = (user, request) => {
 
   // Admin is governance-only: cannot approve/reject requests
   // Only the specifically assigned approver can review
-  return (
-    user.role === ROLES.APPROVER &&
-    request.assignedTo?.toString() === user.id
-  );
+  return request.assignedTo?.toString() === user.id;
 };
 
 const analyticsRoles = [ROLES.APPROVER, ROLES.ADMIN];

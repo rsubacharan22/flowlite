@@ -127,7 +127,8 @@ function OperationalCard({
   request,
   user
 }) {
-  const mayReview = canReview(user) && request.status === 'pending';
+  const mayReview = (canReview(user) || user?.role === 'employee') && request.status === 'pending';
+  const isEmployee = user?.role === 'employee';
   const overdue = isOverdue(request);
 
   return (
@@ -202,7 +203,7 @@ function OperationalCard({
                   icon={CheckCircle2}
                   onClick={() => onApprove(request._id)}
                 >
-                  Approve
+                  {isEmployee ? 'Complete Task' : 'Approve'}
                 </Button>
                 <Button
                   danger
@@ -210,7 +211,7 @@ function OperationalCard({
                   icon={XCircle}
                   onClick={() => onReject(request._id)}
                 >
-                  Reject
+                  {isEmployee ? 'Cannot Complete' : 'Reject'}
                 </Button>
               </div>
             </div>

@@ -70,7 +70,7 @@ function FilterBar({ filter, onChange, filters }) {
 }
 
 // ── Employee: My Requests dashboard ──────────────────────────────────────────
-function EmployeeDashboard({ requests, loading, filter, onFilterChange, search }) {
+function EmployeeDashboard({ requests, loading, filter, onFilterChange, search, user, actioningId, remarks, onApprove, onReject, onRemarkChange }) {
   const filteredRequests = useMemo(() => {
     const q = search.trim().toLowerCase();
     return requests.filter((r) => {
@@ -124,9 +124,14 @@ function EmployeeDashboard({ requests, loading, filter, onFilterChange, search }
         ) : filteredRequests.length ? (
           filteredRequests.map((request) => (
             <RequestCard
+              busy={actioningId === request._id}
               key={request._id}
+              onApprove={onApprove}
+              onReject={onReject}
+              onRemarkChange={onRemarkChange}
+              remark={remarks[request._id] || ''}
               request={request}
-              user={{ role: ROLES.EMPLOYEE }}
+              user={user}
             />
           ))
         ) : (
@@ -428,6 +433,12 @@ function Dashboard() {
             filter={filter}
             onFilterChange={setFilter}
             search={search}
+            user={user}
+            actioningId={actioningId}
+            remarks={remarks}
+            onApprove={(id) => reviewRequest(id, 'approve')}
+            onReject={(id) => reviewRequest(id, 'reject')}
+            onRemarkChange={updateRemark}
           />
         ) : isAdmin ? (
           <AdminDashboard

@@ -96,7 +96,7 @@ router.post("/create", authMiddleware, async (req, res) => {
         title: "New Task Assigned",
         message: `A new task was assigned: ${title}`,
         type: "info",
-        link: `/api/requests/${request._id}` // <--- NEW DIRECT LINK
+        link: `/dashboard` // <--- FIXED NOTIFICATION LINK
       });
     }
 
@@ -107,7 +107,7 @@ router.post("/create", authMiddleware, async (req, res) => {
         title: "New Employee Request",
         message: "A new employee request was submitted.",
         type: "warning",
-        link: `/api/requests/${request._id}` // <--- NEW DIRECT LINK
+        link: `/dashboard` // <--- FIXED NOTIFICATION LINK
       });
     }
 
@@ -150,7 +150,7 @@ const reviewRequest = async (req, res, status) => {
       title: status === "approved" ? "Request Approved" : "Request Rejected",
       message: status === "approved" ? "Your request has been approved." : "Your request has been rejected.",
       type: status === "approved" ? "success" : "error",
-      link: `/api/requests/${request._id}` // <--- NEW DIRECT LINK
+      link: `/dashboard` // <--- FIXED NOTIFICATION LINK
     });
 
     const populatedRequest = await populateRequest(Request.findById(request._id));
@@ -171,7 +171,12 @@ router.put("/reject/:id", authMiddleware, (req, res) => { reviewRequest(req, res
 router.get("/my", authMiddleware, async (req, res) => {
   try {
     const requests = await populateRequest(
-      Request.find({ createdBy: req.user.id }).sort({ createdAt: -1 })
+      Request.find({
+        $or: [
+          { createdBy: req.user.id },
+          { assignedTo: req.user.id }
+        ]
+      }).sort({ createdAt: -1 })
     );
     res.json(requests);
   } catch (err) {
@@ -200,8 +205,8 @@ router.get("/assigned", authMiddleware, async (req, res) => {
 // =====================================================
 router.get("/all", authMiddleware, async (req, res) => {
   try {
-    if (req.user.role !== ROLES.ADMIN) {
-      return res.status(403).json({ message: "Admin access required" });
+    if (req.user.role !== ROLES.ADMIN && req.user.role !== ROLES.APPROVER) {
+      return res.status(403).json({ message: "Admin or Approver access required" });
     }
     const requests = await populateRequest(
       Request.find().sort({ createdAt: -1 })
