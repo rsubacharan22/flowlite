@@ -283,7 +283,7 @@ function ApproverDashboard({
         ) : (
           <EmptyState
             title="No tasks found"
-            message={filter !== 'all' ? 'No tasks match this filter.' : 'Tasks assigned to employees will appear here once submitted.'}
+            message={filters.type !== 'all' || filters.status !== 'all' || filters.priority !== 'all' ? 'No tasks match these filters.' : 'Tasks assigned to employees will appear here once submitted.'}
           />
         )}
       </motion.div>
