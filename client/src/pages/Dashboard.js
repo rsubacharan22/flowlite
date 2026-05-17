@@ -1,4 +1,5 @@
 import {
+  Activity,
   AlertCircle,
   CheckCircle2,
   Clock3,
@@ -291,7 +292,108 @@ function ApproverDashboard({
   );
 }
 
-// Removed AdminDashboard as per user request
+// ── Admin: Governance overview (read-only) ─────────────────────────────────────
+function AdminDashboard({ requests, overviewRequests, loading }) {
+  const metrics = useMemo(() => buildRequestMetrics(overviewRequests), [overviewRequests]);
+
+  // Quick stats for assigned approvers
+  const approverStats = useMemo(() => {
+    const map = {};
+    overviewRequests.forEach((r) => {
+      const name = r.assignedTo?.name;
+      if (!name) return;
+      if (!map[name]) map[name] = { name, total: 0, pending: 0, approved: 0 };
+      map[name].total++;
+      if (r.status === 'pending') map[name].pending++;
+      if (r.status === 'approved') map[name].approved++;
+    });
+    return Object.values(map).sort((a, b) => b.total - a.total).slice(0, 5);
+  }, [overviewRequests]);
+
+  const recentActivity = useMemo(() => overviewRequests.slice(0, 6), [overviewRequests]);
+
+  return (
+    <>
+      {/* Org-wide KPI strip */}
+      <div className="mb-6">
+        <motion.div
+          className="grid gap-3 sm:grid-cols-2 xl:grid-cols-5"
+          initial="hidden" animate="show" variants={staggerContainer}
+        >
+          <MetricCard icon={ShieldCheck} title="Total" tone="blue" value={metrics.total} />
+          <MetricCard icon={Clock3} title="Pending" tone="amber" value={metrics.pending} />
+          <MetricCard icon={CheckCircle2} title="Approved" tone="emerald" value={metrics.approved} />
+          <MetricCard icon={XCircle} title="Rejected" tone="rose" value={metrics.rejected} />
+          <MetricCard icon={AlertCircle} title="Overdue" tone="violet" value={metrics.overdue} />
+        </motion.div>
+      </div>
+
+      {loading ? (
+        <div className="flex min-h-64 items-center justify-center">
+          <Loader2 className="h-6 w-6 animate-spin text-slate-400" />
+        </div>
+      ) : (
+        <div className="grid gap-5 xl:grid-cols-[1fr_1.4fr]">
+          {/* Approver workload */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
+            <div className="flex items-center gap-2 mb-4">
+              <Users className="h-4 w-4 text-slate-400" />
+              <h2 className="text-sm font-bold text-slate-900">Approver Workload</h2>
+            </div>
+            {approverStats.length ? (
+              <div className="space-y-3">
+                {approverStats.map((a) => (
+                  <div key={a.name} className="flex items-center justify-between gap-3">
+                    <div>
+                      <p className="text-sm font-semibold text-slate-800">{a.name}</p>
+                      <p className="text-xs text-slate-400">{a.total} total · {a.pending} pending</p>
+                    </div>
+                    <div className="text-right">
+                      <span className="rounded-md bg-slate-100 px-2 py-0.5 text-xs font-bold text-slate-700">
+                        {a.total ? Math.round((a.approved / a.total) * 100) : 0}%
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-400">No data yet.</p>
+            )}
+          </div>
+
+          {/* Recent activity */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-card">
+            <h2 className="mb-4 text-sm font-bold text-slate-900">Recent Activity</h2>
+            {recentActivity.length ? (
+              <div className="divide-y divide-slate-50">
+                {recentActivity.map((r) => (
+                  <div key={r._id} className="flex items-center justify-between gap-3 py-2.5">
+                    <div className="min-w-0">
+                      <p className="truncate text-sm font-semibold text-slate-800">{r.title}</p>
+                      <p className="text-xs text-slate-400 truncate">
+                        {r.createdBy?.name || '—'} → {r.assignedTo?.name || '—'}
+                      </p>
+                    </div>
+                    <span className={[
+                      'shrink-0 rounded-full px-2 py-0.5 text-xs font-semibold',
+                      r.status === 'approved' ? 'bg-emerald-100 text-emerald-700'
+                      : r.status === 'rejected' ? 'bg-rose-100 text-rose-700'
+                      : 'bg-amber-100 text-amber-700'
+                    ].join(' ')}>
+                      {r.status}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-sm text-slate-400">No recent activity.</p>
+            )}
+          </div>
+        </div>
+      )}
+    </>
+  );
+}
 
 // ── Page ───────────────────────────────────────────────────────────────────────
 function Dashboard() {
@@ -308,14 +410,7 @@ function Dashboard() {
   const [loading, setLoading] = useState(true);
   const [actioningId, setActioningId] = useState('');
 
-  useEffect(() => {
-    if (isAdmin) {
-      navigate('/admin/api/users', { replace: true });
-    }
-  }, [isAdmin, navigate]);
-
   const fetchRequests = useCallback(async () => {
-    if (isAdmin) return; // Admins redirect
     const token = localStorage.getItem('token');
     if (!token || !user) {
       navigate('/', { replace: true });
@@ -325,7 +420,12 @@ function Dashboard() {
     try {
       setLoading(true);
 
-      if (isEmployee) {
+      if (isAdmin) {
+        // Admin sees org-wide overview only
+        const allRes = await api.get('/api/requests/all');
+        setOverviewRequests(allRes.data);
+        setRequests([]);
+      } else if (isEmployee) {
         const res = await api.get('/api/requests/my');
         setRequests(res.data);
       } else {
@@ -380,14 +480,24 @@ function Dashboard() {
     }
   };
 
+  const displayedEmployeeRequests = useMemo(() => {
+    if (!isEmployee) return [];
+    if (location.pathname === '/dashboard') {
+      // My Tasks -> Only assigned tasks (not HR requests)
+      return requests.filter(r => !isEmployeeRequest(r));
+    }
+    // My Requests -> Only HR requests
+    return requests.filter(r => isEmployeeRequest(r));
+  }, [requests, isEmployee, location.pathname]);
+
   const pageTitle = isEmployee
-    ? 'Dashboard'
+    ? (location.pathname === '/dashboard' ? 'My Tasks' : 'My Requests')
     : isAdmin
-    ? 'Dashboard'
+    ? 'Admin Dashboard'
     : 'Dashboard';
 
   const pageSubtitle = isEmployee
-    ? 'Welcome back. Here\'s a summary of your account.'
+    ? (location.pathname === '/dashboard' ? 'Tasks assigned to you.' : 'Your submitted HR requests.')
     : isAdmin
     ? 'Organizational overview across all workflows.'
     : 'Your team\'s task and request activity.';
@@ -403,7 +513,7 @@ function Dashboard() {
       <div className="mx-auto max-w-7xl">
         {isEmployee ? (
           <EmployeeDashboard
-            requests={requests}
+            requests={displayedEmployeeRequests}
             loading={loading}
             filter={filter}
             onFilterChange={setFilter}
@@ -414,6 +524,12 @@ function Dashboard() {
             onApprove={(id) => reviewRequest(id, 'approve')}
             onReject={(id) => reviewRequest(id, 'reject')}
             onRemarkChange={updateRemark}
+          />
+        ) : isAdmin ? (
+          <AdminDashboard
+            requests={requests}
+            overviewRequests={overviewRequests}
+            loading={loading}
           />
         ) : isApprover ? (
           <ApproverDashboard

@@ -72,7 +72,7 @@ function Layout({
       return [
 
         {
-          label: 'Dashboard',
+          label: 'My Tasks',
           icon: LayoutDashboard,
           path: '/dashboard'
         },
@@ -131,6 +131,12 @@ function Layout({
         label: 'Dashboard',
         icon: LayoutDashboard,
         path: '/dashboard'
+      },
+
+      {
+        label: 'Analytics',
+        icon: BarChart3,
+        path: '/analytics'
       },
 
       {
